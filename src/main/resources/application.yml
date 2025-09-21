@@ -1,0 +1,105 @@
+quarkus:
+  arc:
+
+    unremovable-types:
+      - "upeu.edu.pe.security.infrastructure.filters.JwtAuthenticationFilter"
+    exclude-types: none
+  #resteasy-reactive:
+  #  path: /api
+  datasource:
+    db-kind: postgresql
+    username: ${DB_USERNAME:postgres}
+    password: ${DB_PASSWORD:12345678}
+    jdbc:
+      url: jdbc:postgresql://localhost:5433/${DB_NAME:quarkus_db}
+
+  hibernate-orm:
+    database:
+      generation: update
+    log:
+      sql: true
+
+  devservices:
+    enabled: false
+
+  http:
+    port: 8080
+    cors:
+      ~: true
+      origins: "*"
+      headers: "*"
+      methods: "*"
+
+  log:
+
+    level: INFO
+    category:
+      "upeu.edu.pe": DEBUG
+      "io.quarkus.arc": DEBUG
+      "io.quarkus.security": DEBUG
+      "io.quarkus.resteasy": DEBUG
+      "org.jboss.resteasy": DEBUG
+      "io.quarkus.vertx.http": DEBUG
+
+  security:
+    jaxrs:
+      deny-unannotated-endpoints: false
+    auth:
+      enabled-in-dev-mode: false
+
+
+  smallrye-openapi:
+    path: /swagger-ui
+    ui:
+      always-include: true
+
+  smallrye-health:
+    root-path: "/health"
+    ui:
+      always-include: false
+
+  jackson:
+    write-dates-as-timestamps: false
+    serialization:
+      write-dates-as-timestamps: false
+    deserialization:
+      fail-on-unknown-properties: false
+
+  hibernate-validator:
+    method-validation:
+      allow-overriding-parameter-constraints: true
+
+  micrometer:
+    export:
+      prometheus:
+        enabled: true
+        path: "/metrics"
+
+  cache:
+    caffeine:
+      "user-cache":
+        initial-capacity: 100
+        maximum-size: 1000
+        expire-after-write: "10M"
+
+# MicroProfile JWT Configuration
+#mp:
+#  jwt:
+#    verify:
+#      issuer: "https://upeu.edu.pe"
+#      audiences: "upeu-sis"
+
+# SmallRye JWT Configuration - CLAVE CORREGIDA
+#smallrye:
+#  jwt:
+#    new-token:
+#      signature-algorithm: "HS256"
+#      key: "dGVzdC1zZWNyZXQta2V5LWZvci1qd3QtdG9rZW4tZ2VuZXJhdGlvbg=="  # Base64 encoded
+
+# Custom JWT Duration Configuration
+jwt:
+  duration: 3600
+  refresh:
+    duration: 604800
+
+
