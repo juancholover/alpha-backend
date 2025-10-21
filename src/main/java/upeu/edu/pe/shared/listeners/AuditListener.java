@@ -27,7 +27,7 @@ public class AuditListener {
     }
 
     private String getCurrentUser() {
-        // TODO: Implementar obtención del usuario actual
+        // TODO: Implementar obtencion del usuario actual
         // Por ejemplo, desde el contexto de seguridad, JWT, etc.
 
         // Implementación temporal

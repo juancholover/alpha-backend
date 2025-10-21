@@ -8,9 +8,6 @@ import org.eclipse.microprofile.openapi.annotations.info.Contact;
 import org.eclipse.microprofile.openapi.annotations.info.Info;
 import org.eclipse.microprofile.openapi.annotations.security.SecurityScheme;
 import org.eclipse.microprofile.openapi.annotations.servers.Server;
-import upeu.edu.pe.security.infrastructure.filters.JwtAuthenticationFilter;
-
-import java.util.Set;
 
 @ApplicationPath("/")
 @OpenAPIDefinition(
