@@ -8,7 +8,7 @@ import upeu.edu.pe.security.application.dto.UserUpdateDto;
 
 import java.util.List;
 
-@Mapper(componentModel = "cdi")
+@Mapper(componentModel = "cdi", unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public interface UserMapper {
 
     // No need to ignore password since UserResponseDto doesn't have password field

@@ -100,7 +100,9 @@ compileJava {
     // Configuración específica para MapStruct
     options.compilerArgs += [
             "-Amapstruct.defaultComponentModel=cdi",
-            "-Amapstruct.unmappedTargetPolicy=WARN"
+        "-Amapstruct.unmappedTargetPolicy=WARN",
+        // Habilita verbose para que MapStruct imprima trazas detalladas durante la generación
+        "-Amapstruct.verbose=true"
     ]
 }
 

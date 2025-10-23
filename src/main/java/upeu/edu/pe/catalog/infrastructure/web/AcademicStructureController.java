@@ -7,7 +7,7 @@ import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import upeu.edu.pe.catalog.application.dto.AcademicStructureRequestDto;
 import upeu.edu.pe.catalog.application.dto.AcademicStructureResponseDto;
-import upeu.edu.pe.catalog.application.services.AcademicStructureService;
+import upeu.edu.pe.catalog.domain.services.AcademicStructureService;
 import upeu.edu.pe.catalog.shared.response.ApiResponse;
 
 import java.util.List;

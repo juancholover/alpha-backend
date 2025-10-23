@@ -6,7 +6,7 @@ import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import upeu.edu.pe.catalog.application.dto.*;
-import upeu.edu.pe.catalog.application.services.InstitutionService;
+import upeu.edu.pe.catalog.domain.services.InstitutionService;
 import upeu.edu.pe.catalog.shared.response.ApiResponse;
 
 import java.util.List;

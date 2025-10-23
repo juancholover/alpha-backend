@@ -11,7 +11,7 @@ import jakarta.transaction.Transactional;
 import upeu.edu.pe.catalog.application.dto.*;
 import upeu.edu.pe.catalog.application.mapper.InstitutionMapper;
 import upeu.edu.pe.catalog.application.mapper.InstitutionSettingMapper;
-import upeu.edu.pe.catalog.application.services.InstitutionService;
+import upeu.edu.pe.catalog.domain.services.InstitutionService;
 import upeu.edu.pe.catalog.domain.entities.Institution;
 import upeu.edu.pe.catalog.domain.entities.InstitutionSetting;
 import upeu.edu.pe.catalog.domain.repositories.InstitutionRepository;

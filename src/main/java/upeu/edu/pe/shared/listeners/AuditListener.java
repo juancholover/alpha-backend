@@ -1,4 +1,3 @@
-// src/main/java/upeu/edu/pe/shared/listeners/AuditListener.java
 package upeu.edu.pe.shared.listeners;
 
 import jakarta.persistence.PrePersist;

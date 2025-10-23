@@ -1,4 +1,3 @@
-// src/main/java/upeu/edu/pe/catalog/application/dto/CategoryRequestDto.java
 package upeu.edu.pe.catalog.application.dto;
 
 import jakarta.validation.constraints.NotBlank;

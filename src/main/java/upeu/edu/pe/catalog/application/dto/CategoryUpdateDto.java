@@ -1,4 +1,3 @@
-// src/main/java/upeu/edu/pe/catalog/application/dto/CategoryUpdateDto.java
 package upeu.edu.pe.catalog.application.dto;
 
 import jakarta.validation.constraints.Size;

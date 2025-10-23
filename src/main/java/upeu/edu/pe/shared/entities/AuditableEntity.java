@@ -1,25 +1,24 @@
 package upeu.edu.pe.shared.entities;
 
-import jakarta.enterprise.inject.spi.CDI;
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
-import upeu.edu.pe.shared.context.AuditContext;
-import upeu.edu.pe.shared.utils.NormalizeProcessor;
+import lombok.Data;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
 
 @MappedSuperclass
-@Getter
-@Setter
+@Data
 public abstract class AuditableEntity {
 
     @Column(nullable = false)
     private Boolean active = true;
 
+    @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
+    @UpdateTimestamp
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
@@ -32,34 +31,23 @@ public abstract class AuditableEntity {
     @PrePersist
     protected void onCreate() {
         LocalDateTime now = LocalDateTime.now();
-        this.createdAt = now;
-        this.updatedAt = now;
-
-        String currentUser = getCurrentUser();
-        this.createdBy = currentUser;
-        this.updatedBy = currentUser;
-
-        // Procesar anotaciones @Normalize
-        NormalizeProcessor.processNormalizeAnnotations(this);
+        if (this.createdAt == null) {
+            this.createdAt = now;
+        }
+        if (this.updatedAt == null) {
+            this.updatedAt = now;
+        }
+        if (this.createdBy == null) {
+            this.createdBy = "system";
+        }
+        if (this.updatedBy == null) {
+            this.updatedBy = "system";
+        }
     }
 
     @PreUpdate
     protected void onUpdate() {
         this.updatedAt = LocalDateTime.now();
-        this.updatedBy = getCurrentUser();
-
-        // Procesar anotaciones @Normalize
-        NormalizeProcessor.processNormalizeAnnotations(this);
-    }
-
-    private String getCurrentUser() {
-        try {
-            AuditContext auditContext = CDI.current().select(AuditContext.class).get();
-            String currentUser = auditContext.getCurrentUser();
-            return currentUser != null ? currentUser : "system";
-        } catch (Exception e) {
-            System.out.println("Warning: Could not get current user from audit context: " + e.getMessage());
-            return "system";
-        }
+        this.updatedBy = "system";
     }
 }

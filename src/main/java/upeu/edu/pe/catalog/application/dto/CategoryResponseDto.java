@@ -1,4 +1,3 @@
-// src/main/java/upeu/edu/pe/catalog/application/dto/CategoryResponseDto.java
 package upeu.edu.pe.catalog.application.dto;
 
 import lombok.AllArgsConstructor;
