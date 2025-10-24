@@ -35,6 +35,7 @@ public class CustomFieldServiceImpl implements CustomFieldService {
     private final CustomFieldRepository customFieldRepository;
     private final CustomFieldValueRepository customFieldValueRepository;
     private final InstitutionRepository institutionRepository;
+    private final upeu.edu.pe.catalog.domain.services.EntityExistenceService entityExistenceService;
     private final CustomFieldMapper customFieldMapper;
     private final CustomFieldValueMapper customFieldValueMapper;
     private final ObjectMapper objectMapper;
@@ -44,12 +45,14 @@ public class CustomFieldServiceImpl implements CustomFieldService {
             CustomFieldRepository customFieldRepository,
             CustomFieldValueRepository customFieldValueRepository,
             InstitutionRepository institutionRepository,
+            upeu.edu.pe.catalog.domain.services.EntityExistenceService entityExistenceService,
             CustomFieldMapper customFieldMapper,
             CustomFieldValueMapper customFieldValueMapper,
             ObjectMapper objectMapper) {
         this.customFieldRepository = customFieldRepository;
         this.customFieldValueRepository = customFieldValueRepository;
         this.institutionRepository = institutionRepository;
+        this.entityExistenceService = entityExistenceService;
         this.customFieldMapper = customFieldMapper;
         this.customFieldValueMapper = customFieldValueMapper;
         this.objectMapper = objectMapper;
@@ -88,13 +91,23 @@ public class CustomFieldServiceImpl implements CustomFieldService {
         String normalizedFieldName = CustomFieldValidator.normalizeFieldName(customFieldDto.getFieldName());
         customFieldDto.setFieldName(normalizedFieldName);
 
-        // Validar tipo de campo
+        // Normalizar y validar tipo de campo (case-insensitive)
+        if (customFieldDto.getFieldType() != null) {
+            String normalizedType = customFieldDto.getFieldType().toLowerCase();
+            customFieldDto.setFieldType(normalizedType);
+        }
+
         if (!ALLOWED_FIELD_TYPES.contains(customFieldDto.getFieldType())) {
             throw new BusinessException("Tipo de campo no soportado: " + customFieldDto.getFieldType());
         }
 
         // Validaciones específicas por tipo
         CustomFieldValidator.validateFieldDefinition(customFieldDto);
+
+        // Verificar que el tipo de entidad es soportado por el sistema
+        if (!entityExistenceService.isSupportedEntityType(customFieldDto.getEntityType())) {
+            throw new BusinessException("Tipo de entidad no soportado o desconocido: " + customFieldDto.getEntityType());
+        }
 
         // Verificar que no exista otro campo con el mismo nombre para esta institución y tipo de entidad
         if (customFieldRepository.existsByInstitutionAndEntityTypeAndFieldName(
@@ -124,8 +137,18 @@ public class CustomFieldServiceImpl implements CustomFieldService {
         String normalizedFieldName = CustomFieldValidator.normalizeFieldName(customFieldDto.getFieldName());
         customFieldDto.setFieldName(normalizedFieldName);
 
+        // Normalizar tipo de campo
+        if (customFieldDto.getFieldType() != null) {
+            customFieldDto.setFieldType(customFieldDto.getFieldType().toLowerCase());
+        }
+
         if (!ALLOWED_FIELD_TYPES.contains(customFieldDto.getFieldType())) {
             throw new BusinessException("Tipo de campo no soportado: " + customFieldDto.getFieldType());
+        }
+
+        // Verificar que el tipo de entidad es soportado
+        if (!entityExistenceService.isSupportedEntityType(customFieldDto.getEntityType())) {
+            throw new BusinessException("Tipo de entidad no soportado o desconocido: " + customFieldDto.getEntityType());
         }
 
         CustomFieldValidator.validateFieldDefinition(customFieldDto);
@@ -163,6 +186,10 @@ public class CustomFieldServiceImpl implements CustomFieldService {
     @Override
     public Map<String, Object> getCustomFieldValuesForEntity(String institutionCode, String entityType, Long entityId) {
         Institution institution = getInstitutionByCode(institutionCode);
+        // Ensure the target entity exists in the domain
+        if (!entityExistenceService.exists(entityType, entityId)) {
+            throw new NotFoundException("Entidad no encontrada: " + entityType + " id=" + entityId);
+        }
         
         // Obtener todos los valores de campos personalizados para esta entidad
         List<CustomFieldValue> values = customFieldValueRepository
@@ -185,6 +212,11 @@ public class CustomFieldServiceImpl implements CustomFieldService {
             String institutionCode, String entityType, Long entityId, Map<String, Object> values) {
         
         Institution institution = getInstitutionByCode(institutionCode);
+
+        // Ensure the target entity exists before attempting to save values
+        if (!entityExistenceService.exists(entityType, entityId)) {
+            throw new NotFoundException("Entidad no encontrada: " + entityType + " id=" + entityId);
+        }
         
         // Obtener todos los campos personalizados para este tipo de entidad
         List<CustomField> fields = customFieldRepository.findByInstitutionAndEntityType(institution, entityType);

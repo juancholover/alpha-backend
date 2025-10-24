@@ -11,7 +11,7 @@ import upeu.edu.pe.catalog.shared.response.ApiResponse;
 
 import java.util.List;
 
-@Path("/api/institutions")
+@Path("/api/v1/institutions")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
 public class InstitutionController {

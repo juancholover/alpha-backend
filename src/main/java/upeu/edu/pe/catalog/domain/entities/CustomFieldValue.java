@@ -2,6 +2,8 @@ package upeu.edu.pe.catalog.domain.entities;
 
 import io.quarkus.hibernate.orm.panache.PanacheEntityBase;
 import jakarta.persistence.*;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -34,6 +36,7 @@ public class CustomFieldValue extends PanacheEntityBase {
     private Long entityId;
     
     @Column(columnDefinition = "json")
+    @JdbcTypeCode(SqlTypes.JSON)
     private String value;
     
     @Column(name = "created_at", nullable = false)

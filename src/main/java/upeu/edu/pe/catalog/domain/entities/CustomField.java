@@ -2,6 +2,8 @@ package upeu.edu.pe.catalog.domain.entities;
 
 import io.quarkus.hibernate.orm.panache.PanacheEntityBase;
 import jakarta.persistence.*;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -43,9 +45,11 @@ public class CustomField extends PanacheEntityBase {
     private boolean isRequired;
     
     @Column(columnDefinition = "json")
+    @JdbcTypeCode(SqlTypes.JSON)
     private String options; 
     
     @Column(name = "validation_rules", columnDefinition = "json")
+    @JdbcTypeCode(SqlTypes.JSON)
     private String validationRules;
     
     @Column(name = "display_order")

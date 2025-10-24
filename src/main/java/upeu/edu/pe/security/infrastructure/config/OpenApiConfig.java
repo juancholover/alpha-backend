@@ -8,9 +8,11 @@ import org.eclipse.microprofile.openapi.annotations.info.Contact;
 import org.eclipse.microprofile.openapi.annotations.info.Info;
 import org.eclipse.microprofile.openapi.annotations.security.SecurityScheme;
 import org.eclipse.microprofile.openapi.annotations.servers.Server;
+import org.eclipse.microprofile.openapi.annotations.security.SecurityRequirement;
 
 @ApplicationPath("/")
 @OpenAPIDefinition(
+        security = @SecurityRequirement(name = "bearerAuth"),
         info = @Info(
                 title = "Lamb UPEU SIS API",
                 version = "1.0.0",

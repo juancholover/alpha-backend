@@ -12,7 +12,7 @@ import upeu.edu.pe.catalog.shared.response.ApiResponse;
 
 import java.util.List;
 
-@Path("/api/institutions/{institutionCode}/academic-structures")
+@Path("/api/v1/institutions/{institutionCode}/academic-structures")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
 public class AcademicStructureController {

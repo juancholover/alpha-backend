@@ -9,6 +9,8 @@ import jakarta.persistence.*;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 @Data
 @Entity
@@ -31,6 +33,7 @@ public class Institution {
     private String country;
     
     @Column(columnDefinition = "json")
+    @JdbcTypeCode(SqlTypes.JSON)
     private String configuration;
     
     @Column(nullable = false)

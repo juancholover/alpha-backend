@@ -11,7 +11,6 @@ import java.util.List;
 @Mapper(componentModel = "cdi", unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public interface UserMapper {
 
-    // No need to ignore password since UserResponseDto doesn't have password field
     UserResponseDto toResponseDto(User user);
 
     List<UserResponseDto> toResponseDtoList(List<User> users);
@@ -27,8 +26,8 @@ public interface UserMapper {
 
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
     @Mapping(target = "id", ignore = true)
-    @Mapping(target = "username", ignore = true) // Username should not be updatable
-    @Mapping(target = "password", ignore = true) // Password updated separately
+    @Mapping(target = "username", ignore = true) 
+    @Mapping(target = "password", ignore = true) 
     @Mapping(target = "lastLogin", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)

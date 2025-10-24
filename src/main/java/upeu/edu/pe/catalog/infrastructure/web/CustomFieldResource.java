@@ -12,7 +12,7 @@ import upeu.edu.pe.catalog.shared.response.ApiResponse;
 import java.util.List;
 import java.util.Map;
 
-@Path("/api/institutions/{institutionCode}/custom-fields")
+@Path("/api/v1/institutions/{institutionCode}/custom-fields")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
 public class CustomFieldResource {
