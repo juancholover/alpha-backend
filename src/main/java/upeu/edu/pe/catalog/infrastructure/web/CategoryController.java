@@ -1,4 +1,3 @@
-// src/main/java/upeu/edu/pe/catalog/infrastructure/web/CategoryController.java
 package upeu.edu.pe.catalog.infrastructure.web;
 
 import jakarta.inject.Inject;
@@ -15,6 +14,7 @@ import upeu.edu.pe.catalog.application.dto.CategoryRequestDto;
 import upeu.edu.pe.catalog.application.dto.CategoryResponseDto;
 import upeu.edu.pe.catalog.application.dto.CategoryUpdateDto;
 import upeu.edu.pe.catalog.domain.services.CategoryService;
+import java.util.stream.Collectors;
 import upeu.edu.pe.shared.response.ApiResponse;
 
 import java.util.List;
@@ -23,7 +23,6 @@ import java.util.List;
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
 @SecurityRequirement(name = "bearerAuth")
-//@Secured  // Agregar esta anotación
 
 @Tag(name = "Categories", description = "Category management operations")
 public class CategoryController {
@@ -39,11 +38,18 @@ public class CategoryController {
     @GET
     @Operation(summary = "Get all categories", description = "Retrieve all categories")
     @APIResponse(responseCode = "200", description = "Categories retrieved successfully")
-    public Response getAllCategories(@QueryParam("active") @DefaultValue("false") boolean activeOnly) {
+    public Response getAllCategories(@QueryParam("active") Boolean active) {
         System.out.println("=== CATEGORIES ENDPOINT CALLED ===");
+        System.out.println("=== Active filter value: " + active + " ===");
 
-        List<CategoryResponseDto> categories = activeOnly ?
-                categoryService.findAll() : categoryService.findAll();
+        List<CategoryResponseDto> categories = categoryService.findAll();
+        
+        // Si se proporciona el parámetro active, filtrar por ese valor
+        if (active != null) {
+            categories = categories.stream()
+                .filter(c -> active.equals(c.getActive()))
+                .collect(Collectors.toList());
+        }
 
         return Response.ok(ApiResponse.success("Categories retrieved successfully", categories)).build();
     }

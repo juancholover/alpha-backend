@@ -66,6 +66,7 @@ public class InstitutionServiceImpl implements InstitutionService {
     @CacheInvalidateAll(cacheName = "institutions")
     @CacheInvalidateAll(cacheName = "institutionConfigs")
     @CacheInvalidateAll(cacheName = "loginConfigs")
+    @CacheInvalidateAll(cacheName = "loadingConfigs")
     public InstitutionResponseDto createInstitution(InstitutionRequestDto institutionDto) {
         if (institutionRepository.existsByCode(institutionDto.getCode())) {
             throw new BusinessException("Institution code already exists: " + institutionDto.getCode());
@@ -82,6 +83,7 @@ public class InstitutionServiceImpl implements InstitutionService {
     @CacheInvalidateAll(cacheName = "institutions")
     @CacheInvalidateAll(cacheName = "institutionConfigs")
     @CacheInvalidateAll(cacheName = "loginConfigs")
+    @CacheInvalidateAll(cacheName = "loadingConfigs")
     public InstitutionResponseDto updateInstitution(String code, InstitutionRequestDto institutionDto) {
         Institution institution = institutionRepository.findByCode(code)
                 .orElseThrow(() -> new NotFoundException("Institution not found: " + code));
@@ -106,6 +108,7 @@ public class InstitutionServiceImpl implements InstitutionService {
     @CacheInvalidateAll(cacheName = "institutions")
     @CacheInvalidateAll(cacheName = "institutionConfigs")
     @CacheInvalidateAll(cacheName = "loginConfigs")
+    @CacheInvalidateAll(cacheName = "loadingConfigs")
     public void deleteInstitution(String code) {
         Institution institution = institutionRepository.findByCode(code)
                 .orElseThrow(() -> new NotFoundException("Institution not found: " + code));
@@ -119,6 +122,7 @@ public class InstitutionServiceImpl implements InstitutionService {
     @CacheInvalidateAll(cacheName = "institutions")
     @CacheInvalidateAll(cacheName = "institutionConfigs")
     @CacheInvalidateAll(cacheName = "loginConfigs")
+    @CacheInvalidateAll(cacheName = "loadingConfigs")
     public void activateInstitution(String code) {
         Institution institution = institutionRepository.findByCode(code)
                 .orElseThrow(() -> new NotFoundException("Institution not found: " + code));
@@ -132,6 +136,7 @@ public class InstitutionServiceImpl implements InstitutionService {
     @CacheInvalidateAll(cacheName = "institutions")
     @CacheInvalidateAll(cacheName = "institutionConfigs")
     @CacheInvalidateAll(cacheName = "loginConfigs")
+    @CacheInvalidateAll(cacheName = "loadingConfigs")
     public void deactivateInstitution(String code) {
         Institution institution = institutionRepository.findByCode(code)
                 .orElseThrow(() -> new NotFoundException("Institution not found: " + code));
@@ -203,6 +208,96 @@ public class InstitutionServiceImpl implements InstitutionService {
     }
 
     @Override
+    @CacheResult(cacheName = "loadingConfigs")
+    public LoadingConfigDto getLoadingConfig(String code) {
+        Institution institution = institutionRepository.findByCodeAndIsActiveTrue(code)
+                .orElseThrow(() -> new NotFoundException("Active institution not found: " + code));
+
+        List<InstitutionSetting> settings = settingRepository.findByInstitutionIdAndModuleInAndIsPublicTrue(
+                institution.getId(), Arrays.asList("loading", "appearance"));
+
+        Map<String, Object> formattedSettings = formatSettings(settings);
+        Map<String, Object> config;
+
+        try {
+            config = institution.getConfiguration() != null ?
+                    objectMapper.readValue(institution.getConfiguration(), new TypeReference<Map<String, Object>>() {}) :
+                    new HashMap<>();
+        } catch (JsonProcessingException e) {
+            config = new HashMap<>();
+        }
+
+        // Extraer valores específicos para el loading
+        @SuppressWarnings("unchecked")
+        Map<String, Object> colors = (Map<String, Object>) config.getOrDefault("colors",
+                formattedSettings.getOrDefault("appearance.theme_colors", new HashMap<>()));
+
+        String logo = (String) config.getOrDefault("imageURL", config.getOrDefault("logo", null));
+        String videoUrl = (String) config.getOrDefault("videoURL", 
+                formattedSettings.getOrDefault("loading.video_url", null));
+        String welcomeMessage = (String) config.getOrDefault("welcomeMessage",
+                formattedSettings.getOrDefault("loading.welcome_message", "Bienvenido a " + institution.getName()));
+
+        // Links de información en el encabezado
+        @SuppressWarnings("unchecked")
+        List<Map<String, String>> headerLinksData = (List<Map<String, String>>) 
+                config.getOrDefault("headerLinks", formattedSettings.getOrDefault("loading.header_links", new ArrayList<>()));
+        List<LoadingConfigDto.InfoLinkDto> headerLinks = headerLinksData.stream()
+                .map(link -> LoadingConfigDto.InfoLinkDto.builder()
+                        .title(link.get("title"))
+                        .url(link.get("url"))
+                        .icon(link.get("icon"))
+                        .build())
+                .collect(Collectors.toList());
+
+        // Cards de información universitaria
+        @SuppressWarnings("unchecked")
+        List<Map<String, String>> infoCardsData = (List<Map<String, String>>) 
+                config.getOrDefault("infoCards", formattedSettings.getOrDefault("loading.info_cards", new ArrayList<>()));
+        List<LoadingConfigDto.InfoCardDto> infoCards = infoCardsData.stream()
+                .map(card -> LoadingConfigDto.InfoCardDto.builder()
+                        .title(card.get("title"))
+                        .description(card.get("description"))
+                        .icon(card.get("icon"))
+                        .url(card.get("url"))
+                        .build())
+                .collect(Collectors.toList());
+
+        // Ranking de la universidad
+        @SuppressWarnings("unchecked")
+        Map<String, String> rankingData = (Map<String, String>) 
+                config.getOrDefault("ranking", formattedSettings.getOrDefault("loading.ranking", new HashMap<>()));
+        LoadingConfigDto.UniversityRankingDto ranking = null;
+        if (!rankingData.isEmpty()) {
+            ranking = LoadingConfigDto.UniversityRankingDto.builder()
+                    .position(rankingData.get("position"))
+                    .category(rankingData.get("category"))
+                    .year(rankingData.get("year"))
+                    .description(rankingData.get("description"))
+                    .logoUrl(rankingData.get("logoUrl"))
+                    .build();
+        }
+
+        // Gráficas de la universidad
+        @SuppressWarnings("unchecked")
+        Map<String, Object> graphics = (Map<String, Object>) 
+                config.getOrDefault("graphics", formattedSettings.getOrDefault("loading.graphics", new HashMap<>()));
+
+        return LoadingConfigDto.builder()
+                .name(institution.getName())
+                .code(institution.getCode())
+                .logo(logo)
+                .videoUrl(videoUrl)
+                .welcomeMessage(welcomeMessage)
+                .colors(colors)
+                .headerLinks(headerLinks)
+                .infoCards(infoCards)
+                .ranking(ranking)
+                .graphics(graphics)
+                .build();
+    }
+
+    @Override
     public List<InstitutionSettingDto> getInstitutionSettings(String code) {
         Institution institution = institutionRepository.findByCodeAndIsActiveTrue(code)
                 .orElseThrow(() -> new NotFoundException("Active institution not found: " + code));
@@ -229,6 +324,7 @@ public class InstitutionServiceImpl implements InstitutionService {
     @Transactional
     @CacheInvalidateAll(cacheName = "institutionConfigs")
     @CacheInvalidateAll(cacheName = "loginConfigs")
+    @CacheInvalidateAll(cacheName = "loadingConfigs")
     public InstitutionSettingDto createInstitutionSetting(String code, InstitutionSettingDto settingDto) {
         Institution institution = institutionRepository.findByCodeAndIsActiveTrue(code)
                 .orElseThrow(() -> new NotFoundException("Active institution not found: " + code));
@@ -251,6 +347,7 @@ public class InstitutionServiceImpl implements InstitutionService {
     @Transactional
     @CacheInvalidateAll(cacheName = "institutionConfigs")
     @CacheInvalidateAll(cacheName = "loginConfigs")
+    @CacheInvalidateAll(cacheName = "loadingConfigs")
     public InstitutionSettingDto updateInstitutionSetting(Long id, InstitutionSettingDto settingDto) {
         InstitutionSetting setting = settingRepository.findByIdOptional(id)
                 .orElseThrow(() -> new NotFoundException("Setting not found with ID: " + id));
@@ -265,9 +362,41 @@ public class InstitutionServiceImpl implements InstitutionService {
     @Transactional
     @CacheInvalidateAll(cacheName = "institutionConfigs")
     @CacheInvalidateAll(cacheName = "loginConfigs")
+    @CacheInvalidateAll(cacheName = "loadingConfigs")
     public void deleteInstitutionSetting(Long id) {
         if (!settingRepository.deleteById(id)) {
             throw new NotFoundException("Setting not found with ID: " + id);
+        }
+    }
+
+    @Override
+    @Transactional
+    @CacheInvalidateAll(cacheName = "institutions")
+    @CacheInvalidateAll(cacheName = "institutionConfigs")
+    @CacheInvalidateAll(cacheName = "loginConfigs")
+    @CacheInvalidateAll(cacheName = "loadingConfigs")
+    public void updateInstitutionImageUrl(String code, String imageUrl) {
+        Institution institution = institutionRepository.findByCode(code)
+                .orElseThrow(() -> new NotFoundException("Institution not found: " + code));
+
+        try {
+            // Obtener la configuración actual o crear una nueva
+            Map<String, Object> config;
+            if (institution.getConfiguration() != null && !institution.getConfiguration().isEmpty()) {
+                config = objectMapper.readValue(institution.getConfiguration(), new TypeReference<Map<String, Object>>() {});
+            } else {
+                config = new HashMap<>();
+            }
+
+            // Actualizar la URL de la imagen
+            config.put("imageURL", imageUrl);
+
+            // Guardar la configuración actualizada
+            institution.setConfiguration(objectMapper.writeValueAsString(config));
+            institutionRepository.persist(institution);
+
+        } catch (JsonProcessingException e) {
+            throw new BusinessException("Error processing configuration JSON: " + e.getMessage());
         }
     }
 

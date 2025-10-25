@@ -4,6 +4,8 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
@@ -30,6 +32,7 @@ public class AcademicStructure {
     private Integer periodsPerYear;
     
     @Column(columnDefinition = "json")
+    @JdbcTypeCode(SqlTypes.JSON)
     private String configuration;  // JSON con detalles específicos
     
     @Column(nullable = false)

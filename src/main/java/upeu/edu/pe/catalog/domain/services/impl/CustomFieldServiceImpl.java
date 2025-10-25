@@ -87,11 +87,10 @@ public class CustomFieldServiceImpl implements CustomFieldService {
     @Transactional
     public CustomFieldDto createCustomField(String institutionCode, CustomFieldDto customFieldDto) {
         Institution institution = getInstitutionByCode(institutionCode);
-        // Normalizar nombre de campo (slug-like)
+
         String normalizedFieldName = CustomFieldValidator.normalizeFieldName(customFieldDto.getFieldName());
         customFieldDto.setFieldName(normalizedFieldName);
 
-        // Normalizar y validar tipo de campo (case-insensitive)
         if (customFieldDto.getFieldType() != null) {
             String normalizedType = customFieldDto.getFieldType().toLowerCase();
             customFieldDto.setFieldType(normalizedType);
@@ -101,7 +100,6 @@ public class CustomFieldServiceImpl implements CustomFieldService {
             throw new BusinessException("Tipo de campo no soportado: " + customFieldDto.getFieldType());
         }
 
-        // Validaciones específicas por tipo
         CustomFieldValidator.validateFieldDefinition(customFieldDto);
 
         // Verificar que el tipo de entidad es soportado por el sistema
@@ -188,7 +186,8 @@ public class CustomFieldServiceImpl implements CustomFieldService {
         Institution institution = getInstitutionByCode(institutionCode);
         // Ensure the target entity exists in the domain
         if (!entityExistenceService.exists(entityType, entityId)) {
-            throw new NotFoundException("Entidad no encontrada: " + entityType + " id=" + entityId);
+            String errorMessage = buildEntityNotFoundMessage(entityType, entityId);
+            throw new NotFoundException(errorMessage);
         }
         
         // Obtener todos los valores de campos personalizados para esta entidad
@@ -215,7 +214,8 @@ public class CustomFieldServiceImpl implements CustomFieldService {
 
         // Ensure the target entity exists before attempting to save values
         if (!entityExistenceService.exists(entityType, entityId)) {
-            throw new NotFoundException("Entidad no encontrada: " + entityType + " id=" + entityId);
+            String errorMessage = buildEntityNotFoundMessage(entityType, entityId);
+            throw new NotFoundException(errorMessage);
         }
         
         // Obtener todos los campos personalizados para este tipo de entidad
@@ -330,6 +330,40 @@ public class CustomFieldServiceImpl implements CustomFieldService {
     private Institution getInstitutionByCode(String code) {
         return institutionRepository.findByCodeAndIsActiveTrue(code)
                 .orElseThrow(() -> new NotFoundException("Institución no encontrada: " + code));
+    }
+
+    private String buildEntityNotFoundMessage(String entityType, Long entityId) {
+        StringBuilder message = new StringBuilder();
+        message.append("La entidad '").append(entityType).append("' con ID=").append(entityId).append(" no existe. ");
+        
+        // Agregar información útil según el tipo de entidad
+        if ("category".equalsIgnoreCase(entityType)) {
+            try {
+                // Usar categoryRepository en lugar de llamar directamente a la entidad
+                upeu.edu.pe.catalog.domain.repositories.CategoryRepository categoryRepo = 
+                    jakarta.enterprise.inject.spi.CDI.current().select(
+                        upeu.edu.pe.catalog.domain.repositories.CategoryRepository.class
+                    ).get();
+                
+                List<upeu.edu.pe.catalog.domain.entities.Category> categories = 
+                    categoryRepo.getAllCategories();
+                
+                if (categories.isEmpty()) {
+                    message.append("No hay categorías registradas en el sistema. Por favor, cree una categoría primero usando POST /api/v1/categories");
+                } else {
+                    message.append("IDs de categorías disponibles: ");
+                    message.append(categories.stream()
+                        .map(c -> c.getId() + " (" + c.getName() + ")")
+                        .collect(Collectors.joining(", ")));
+                }
+            } catch (Exception e) {
+                message.append("Verifique que el ID de la categoría sea correcto.");
+            }
+        } else {
+            message.append("Verifique que el ID de la entidad sea correcto.");
+        }
+        
+        return message.toString();
     }
 
     // Validation and normalization delegated to CustomFieldValidator

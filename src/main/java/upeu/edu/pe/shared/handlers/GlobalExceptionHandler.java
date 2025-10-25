@@ -24,12 +24,20 @@ public class GlobalExceptionHandler implements ExceptionMapper<Exception> {
         
         if (exception instanceof NotFoundException ||
                 exception.getClass().getName().equals("upeu.edu.pe.catalog.shared.exceptions.NotFoundException")) {
-            return handleNotFoundGeneric(exception);
+            if (exception instanceof NotFoundException) {
+                return handleNotFoundException((NotFoundException) exception);
+            } else {
+                return handleNotFoundGeneric(exception);
+            }
         }
 
         if (exception instanceof BusinessException ||
                 exception.getClass().getName().equals("upeu.edu.pe.catalog.shared.exceptions.BusinessException")) {
-            return handleBusinessGeneric(exception);
+            if (exception instanceof BusinessException) {
+                return handleBusinessException((BusinessException) exception);
+            } else {
+                return handleBusinessGeneric(exception);
+            }
         }
 
         if (exception instanceof ValidationException) {

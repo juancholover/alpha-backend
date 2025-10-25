@@ -35,6 +35,14 @@ nb-configuration.xml
 # Local environment
 .env
 
+# Documentation files (keep locally, don't push to GitHub)
+AZURE_IMAGE_UPLOAD.md
+TESTING_IMAGE_UPLOAD.md
+COMO_PROBAR.md
+CREAR_CONTENEDOR_AZURE.md
+LOADING_CONFIG.md
+LOADING_MODULE_SUMMARY.md
+
 # Plugin directory
 /.quarkus/cli/plugins/
 # TLS Certificates

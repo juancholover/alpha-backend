@@ -24,6 +24,8 @@ public interface InstitutionService {
     
     LoginConfigDto getLoginConfig(String code);
     
+    LoadingConfigDto getLoadingConfig(String code);
+    
     // Métodos para configuraciones
     List<InstitutionSettingDto> getInstitutionSettings(String code);
     
@@ -34,4 +36,7 @@ public interface InstitutionService {
     InstitutionSettingDto updateInstitutionSetting(Long id, InstitutionSettingDto settingDto);
     
     void deleteInstitutionSetting(Long id);
+    
+    // Método para actualizar la URL de la imagen en la configuración
+    void updateInstitutionImageUrl(String code, String imageUrl);
 }
