@@ -58,12 +58,12 @@ public class User extends AuditableEntity {
     @Normalize(Normalize.NormalizeType.SPACES_ONLY) // Solo limpiar espacios
     private String phone;
 
-    @Comment("Rol del usuario en el sistema (USER, ADMIN, etc.)")
+    @Comment("Rol del usuario en el sistema (ADMIN, MANAGER, USER)")
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private UserRole role = UserRole.USER;
 
-    @Comment("Estado del usuario (ACTIVE, INACTIVE, SUSPENDED)")
+    @Comment("Estado del usuario (ACTIVE, INACTIVE, SUSPENDED, PENDING_VERIFICATION)")
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private UserStatus status = UserStatus.ACTIVE;
