@@ -4,8 +4,6 @@ quarkus:
     unremovable-types:
       - "upeu.edu.pe.security.infrastructure.filters.JwtAuthenticationFilter"
     exclude-types: none
-  #resteasy-reactive:
-  #  path: /api
   datasource:
     db-kind: postgresql
     username: ${DB_USERNAME:postgres}
@@ -23,7 +21,7 @@ quarkus:
     enabled: false
 
   http:
-    port: 8080
+    port: 8081
     cors:
       ~: true
       origins: "*"
@@ -82,21 +80,7 @@ quarkus:
         maximum-size: 1000
         expire-after-write: "10M"
 
-# MicroProfile JWT Configuration
-#mp:
-#  jwt:
-#    verify:
-#      issuer: "https://upeu.edu.pe"
-#      audiences: "upeu-sis"
 
-# SmallRye JWT Configuration - CLAVE CORREGIDA
-#smallrye:
-#  jwt:
-#    new-token:
-#      signature-algorithm: "HS256"
-#      key: "dGVzdC1zZWNyZXQta2V5LWZvci1qd3QtdG9rZW4tZ2VuZXJhdGlvbg=="  # Base64 encoded
-
-# Custom JWT Duration Configuration
 jwt:
   duration: 3600
   refresh:
